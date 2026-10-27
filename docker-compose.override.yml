@@ -1,0 +1,4 @@
+services:
+  mysql:
+    ports: !override
+      - "127.0.0.1:3307:3306"

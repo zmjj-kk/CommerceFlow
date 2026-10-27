@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CommerceFlow · 登录</title>
+<script src="/static/auth.js"></script>
+<style>
+body{font:16px system-ui;background:#fff6e6;color:#2b2632;display:grid;place-items:center;min-height:95vh;margin:0}
+main{width:min(360px,80vw);padding:32px;border:3px solid #2b2632;box-shadow:6px 6px #2b2632;background:#fffaf0}
+h1{margin:0 0 12px}label{display:block;margin-top:20px}input,button{box-sizing:border-box;width:100%;font:inherit;padding:12px;margin-top:8px;border:2px solid #2b2632}
+button{cursor:pointer;background:#ff9f57;font-weight:700}button.secondary{background:#fff6e6}#error{min-height:24px;color:#a22535;font-size:14px}p{line-height:1.5;font-size:14px}
+</style>
+</head>
+<body><main>
+<h1>CommerceFlow</h1><p>登录后管理您的会话、订单与售后申请。</p>
+<form id="login">
+<label for="username">用户名</label><input id="username" name="username" autocomplete="username" required maxlength="64">
+<label for="password">密码</label><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="128">
+<p id="error" role="alert"></p><button id="submit" type="submit">登录</button>
+<button class="secondary" id="register" type="button">注册账户</button>
+</form><p>默认由管理员创建账户。注册密码需 12–128 位，包含字母与数字。</p>
+</main><script>
+const form = document.getElementById("login"), error = document.getElementById("error");
+async function act(register) {
+  error.textContent = "";
+  const buttons = form.querySelectorAll("button"); buttons.forEach(b => b.disabled = true);
+  try {
+    const username = form.elements.username.value, password = form.elements.password.value;
+    if (register) await commerceflowAuth.register(username, password);
+    await commerceflowAuth.login(username, password);
+    const next = new URLSearchParams(location.search).get("next") || "/";
+    const destination = new URL(next, location.origin);
+    location.replace(destination.origin === location.origin && destination.pathname !== "/login" ?
+      destination.pathname + destination.search + destination.hash : "/");
+  } catch(e) { error.textContent = e.message; }
+  finally { form.elements.password.value = ""; buttons.forEach(b => b.disabled = false); }
+}
+form.onsubmit = e => { e.preventDefault(); act(false); };
+document.getElementById("register").onclick = () => act(true);
+</script></body></html>
